@@ -43,17 +43,20 @@
       query,
       orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyAxK2iIpGCMHKGJb51MMOShy3RXQTG1J9E",
+      authDomain: "secret-portal-b1280.firebaseapp.com",
+      projectId: "secret-portal-b1280",
+      storageBucket: "secret-portal-b1280.firebasestorage.app",
+      messagingSenderId: "980339818852",
+      appId: "1:980339818852:web:8b6cfe8fe57b6335433a71",
+      measurementId: "G-PG4Q37WZ6H"
     };
 
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const db = getFirestore(app);
     const messagesRef = collection(db, "messages");
 
