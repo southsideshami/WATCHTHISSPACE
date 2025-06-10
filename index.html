@@ -83,12 +83,16 @@
     const messagesRef = collection(db, "messages");
 
     let username = "";
-    if (!localStorage.getItem("secret_username")) {
-      username = prompt("Choose a name and emoji (e.g., Alex 😎):");
-      localStorage.setItem("secret_username", username);
-    } else {
-      username = localStorage.getItem("secret_username");
-    }
+    window.addEventListener("load", () => {
+      if (!localStorage.getItem("secret_username")) {
+        setTimeout(() => {
+          username = prompt("Choose a name and emoji (e.g., Alex 😎):") || "Anonymous 👻";
+          localStorage.setItem("secret_username", username);
+        }, 200);
+      } else {
+        username = localStorage.getItem("secret_username");
+      }
+    });
 
     const sendMessage = async () => {
       const input = document.getElementById("messageInput");
