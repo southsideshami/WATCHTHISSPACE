@@ -17,17 +17,12 @@
   <!-- Real-Time Messaging Section -->
   <section id="messagesSection" class="max-w-2xl mx-auto mt-10 p-6 bg-gray-800 rounded-lg shadow-lg">
     <h2 class="text-xl mb-4 font-semibold">📬 Send a Message</h2>
-    
     <div class="space-y-4">
       <textarea id="messageInput" placeholder="Leave your secret message..." class="w-full px-3 py-2 text-black rounded h-24"></textarea>
       <div class="flex gap-4">
         <button id="sendButton" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Send ✉️</button>
         <button id="historyButton" class="bg-yellow-500 hover:bg-yellow-700 text-black px-4 py-2 rounded">View History 🕰️</button>
       </div>
-    </div>
-
-    <div id="messages" class="mt-6 space-y-3">
-      <!-- Live messages appear here if added later -->
     </div>
   </section>
 
@@ -38,7 +33,7 @@
       <button id="backButton" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded">Back</button>
     </div>
     <div id="messageHistory" class="space-y-3">
-      <!-- History gets populated by app.js -->
+      <!-- History gets populated dynamically -->
     </div>
   </section>
 
@@ -47,7 +42,72 @@
     &copy; 2025 <span class="italic">The Sneaky Two™</span> 👀
   </footer>
 
-  <!-- Load Script -->
-  <script type="module" src="app.js"></script>
+  <!-- Embedded Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      serverTimestamp,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const messagesRef = collection(db, "messages");
+
+    let username = localStorage.getItem("secret_username");
+    if (!username) {
+      username = prompt("Choose a name for this secret chat:");
+      localStorage.setItem("secret_username", username);
+    }
+
+    const sendMessage = async () => {
+      const input = document.getElementById("messageInput");
+      if (input.value.trim()) {
+        await addDoc(messagesRef, {
+          sender: username,
+          text: input.value,
+          timestamp: serverTimestamp()
+        });
+        input.value = "";
+      }
+    };
+
+    document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+    document.getElementById("historyButton").addEventListener("click", async () => {
+      const history = document.getElementById("messageHistory");
+      history.innerHTML = "";
+      const snapshot = await getDocs(query(messagesRef, orderBy("timestamp")));
+      snapshot.forEach((docSnap) => {
+        const msg = docSnap.data();
+        const msgEl = document.createElement("div");
+        msgEl.classList = "bg-gray-700 text-white px-4 py-2 rounded shadow mb-2";
+        msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
+        history.appendChild(msgEl);
+      });
+
+      document.getElementById("messagesSection").classList.add("hidden");
+      document.getElementById("historySection").classList.remove("hidden");
+    });
+
+    document.getElementById("backButton").addEventListener("click", () => {
+      document.getElementById("historySection").classList.add("hidden");
+      document.getElementById("messagesSection").classList.remove("hidden");
+    });
+  </script>
 </body>
 </html>
