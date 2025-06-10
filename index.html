@@ -39,6 +39,7 @@
     <div class="space-y-4">
       <textarea id="messageInput" placeholder="Leave your secret message..." class="w-full px-3 py-2 text-black rounded h-24"></textarea>
       <button id="sendButton" class="bg-pink-600 hover:bg-pink-800 text-white px-4 py-2 rounded">Send ✉️</button>
+      <button id="clearLocalMessages" class="bg-gray-600 hover:bg-gray-800 text-white px-4 py-2 rounded">Clear My Chat View ❌</button>
     </div>
     <div id="messageHistory" class="mt-6 space-y-3">
       <!-- Live chat history populated dynamically -->
@@ -107,6 +108,7 @@
       const msgEl = document.createElement("div");
       msgEl.classList = "bg-gray-700 text-white px-4 py-2 rounded shadow mb-2";
       msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
+      msgEl.dataset.id = docSnap.id;
       history.appendChild(msgEl);
       history.scrollTop = history.scrollHeight;
 
@@ -116,6 +118,11 @@
     };
 
     document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+    document.getElementById("clearLocalMessages").addEventListener("click", () => {
+      const history = document.getElementById("messageHistory");
+      history.innerHTML = "";
+    });
 
     onSnapshot(query(messagesRef, orderBy("timestamp")), (snapshot) => {
       const history = document.getElementById("messageHistory");
