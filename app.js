@@ -6,10 +6,8 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot,
+  getDocs,
   serverTimestamp,
-  deleteDoc,
-  doc,
   query,
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -49,15 +47,23 @@ const sendMessage = async () => {
 
 document.getElementById("sendButton").addEventListener("click", sendMessage);
 
-// Real-time message listener
-onSnapshot(query(messagesRef, orderBy("timestamp")), (snapshot) => {
-  const messages = document.getElementById("messages");
-  messages.innerHTML = "";
-  snapshot.forEach((doc) => {
-    const msg = doc.data();
+document.getElementById("historyButton").addEventListener("click", async () => {
+  const history = document.getElementById("messageHistory");
+  history.innerHTML = "<h2 class='text-xl font-semibold mb-4'>🕰️ Message History</h2>";
+  const snapshot = await getDocs(query(messagesRef, orderBy("timestamp")));
+  snapshot.forEach((docSnap) => {
+    const msg = docSnap.data();
     const msgEl = document.createElement("div");
     msgEl.classList = "bg-gray-700 text-white px-4 py-2 rounded shadow mb-2";
     msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
-    messages.appendChild(msgEl);
+    history.appendChild(msgEl);
   });
+
+  document.getElementById("messagesSection").classList.add("hidden");
+  document.getElementById("historySection").classList.remove("hidden");
+});
+
+document.getElementById("backButton").addEventListener("click", () => {
+  document.getElementById("historySection").classList.add("hidden");
+  document.getElementById("messagesSection").classList.remove("hidden");
 });
