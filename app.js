@@ -13,13 +13,6 @@ import {
   query,
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -32,16 +25,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
-
 const messagesRef = collection(db, "messages");
-const galleryRef = collection(db, "gallery");
+
+// Get username once per session
+let username = localStorage.getItem("secret_username");
+if (!username) {
+  username = prompt("Choose a name for this secret chat:");
+  localStorage.setItem("secret_username", username);
+}
 
 // Handle new message
 const sendMessage = async () => {
   const input = document.getElementById("messageInput");
   if (input.value.trim()) {
     await addDoc(messagesRef, {
+      sender: username,
       text: input.value,
       timestamp: serverTimestamp()
     });
@@ -56,45 +54,10 @@ onSnapshot(query(messagesRef, orderBy("timestamp")), (snapshot) => {
   const messages = document.getElementById("messages");
   messages.innerHTML = "";
   snapshot.forEach((doc) => {
-    const msg = document.createElement("p");
-    msg.textContent = doc.data().text;
-    messages.appendChild(msg);
-  });
-});
-
-// Handle image upload
-const uploadImage = async (file) => {
-  const imageRef = ref(storage, `uploads/${file.name}`);
-  await uploadBytes(imageRef, file);
-  const url = await getDownloadURL(imageRef);
-  await addDoc(galleryRef, {
-    imageUrl: url,
-    uploadedAt: Date.now()
-  });
-};
-
-document.getElementById("uploadButton").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) uploadImage(file);
-});
-
-// Display images and auto-delete after 2 hours
-onSnapshot(galleryRef, (snapshot) => {
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-  snapshot.forEach(async (docSnap) => {
-    const data = docSnap.data();
-    const now = Date.now();
-    if (now - data.uploadedAt >= 2 * 60 * 60 * 1000) {
-      // Delete image from storage and Firestore
-      const imgRef = ref(storage, data.imageUrl);
-      await deleteObject(imgRef).catch(() => {});
-      await deleteDoc(doc(db, "gallery", docSnap.id));
-    } else {
-      const img = document.createElement("img");
-      img.src = data.imageUrl;
-      img.classList = "w-40 h-40 object-cover m-2 rounded-lg";
-      gallery.appendChild(img);
-    }
+    const msg = doc.data();
+    const msgEl = document.createElement("div");
+    msgEl.classList = "bg-gray-700 text-white px-4 py-2 rounded shadow mb-2";
+    msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
+    messages.appendChild(msgEl);
   });
 });
