@@ -5,13 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>👀 Secret Portal</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: black;
+      z-index: -2;
+    }
+    canvas#matrixCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body class="bg-black text-white font-sans">
 
+  <canvas id="matrixCanvas"></canvas>
+
   <!-- Top Banner -->
-  <header class="bg-blue-900 text-center py-6 shadow-md">
-    <h1 class="text-4xl font-bold tracking-wide">🎭 Portal of Secrets</h1>
-    <p class="text-sm italic opacity-80">Leave a whisper. Hide a memory. 🕶️</p>
+  <header class="bg-black text-center py-6 shadow-md">
+    <h1 class="text-4xl font-bold tracking-wide">🎯 Portal of Secrets</h1>
+    <p class="text-sm italic opacity-80">Leave a whisper. Hide a memory. 👶‍♂️</p>
   </header>
 
   <!-- Real-Time Messaging Section -->
@@ -19,7 +38,7 @@
     <h2 class="text-xl mb-4 font-semibold">📬 Send a Message</h2>
     <div class="space-y-4">
       <textarea id="messageInput" placeholder="Leave your secret message..." class="w-full px-3 py-2 text-black rounded h-24"></textarea>
-      <button id="sendButton" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Send ✉️</button>
+      <button id="sendButton" class="bg-pink-600 hover:bg-pink-800 text-white px-4 py-2 rounded">Send ✉️</button>
     </div>
     <div id="messageHistory" class="mt-6 space-y-3">
       <!-- Live chat history populated dynamically -->
@@ -41,7 +60,9 @@
       onSnapshot,
       serverTimestamp,
       query,
-      orderBy
+      orderBy,
+      deleteDoc,
+      doc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
@@ -60,10 +81,12 @@
     const db = getFirestore(app);
     const messagesRef = collection(db, "messages");
 
-    let username = localStorage.getItem("secret_username");
-    if (!username) {
-      username = prompt("Choose a name for this secret chat:");
+    let username = "";
+    if (!localStorage.getItem("secret_username")) {
+      username = prompt("Choose a name and emoji (e.g., Alex 😎):");
       localStorage.setItem("secret_username", username);
+    } else {
+      username = localStorage.getItem("secret_username");
     }
 
     const sendMessage = async () => {
@@ -78,13 +101,18 @@
       }
     };
 
-    const displayMessage = (msg) => {
+    const displayMessage = (docSnap) => {
+      const msg = docSnap.data();
       const history = document.getElementById("messageHistory");
       const msgEl = document.createElement("div");
       msgEl.classList = "bg-gray-700 text-white px-4 py-2 rounded shadow mb-2";
       msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
       history.appendChild(msgEl);
       history.scrollTop = history.scrollHeight;
+
+      setTimeout(async () => {
+        await deleteDoc(doc(db, "messages", docSnap.id));
+      }, 60000);
     };
 
     document.getElementById("sendButton").addEventListener("click", sendMessage);
@@ -93,9 +121,37 @@
       const history = document.getElementById("messageHistory");
       history.innerHTML = "";
       snapshot.forEach((docSnap) => {
-        displayMessage(docSnap.data());
+        displayMessage(docSnap);
       });
     });
+
+    // Matrix pink letters background
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const letters = "abcdefghijklmnopqrstuvwxyz";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ff69b4";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
   </script>
 </body>
 </html>
