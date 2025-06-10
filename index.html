@@ -86,9 +86,7 @@
       }
     };
 
-    document.getElementById("sendButton").addEventListener("click", sendMessage);
-
-    document.getElementById("historyButton").addEventListener("click", async () => {
+    const loadHistory = async () => {
       const history = document.getElementById("messageHistory");
       history.innerHTML = "";
       const snapshot = await getDocs(query(messagesRef, orderBy("timestamp")));
@@ -99,7 +97,12 @@
         msgEl.innerHTML = `<strong>${msg.sender}</strong>: ${msg.text}`;
         history.appendChild(msgEl);
       });
+    };
 
+    document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+    document.getElementById("historyButton").addEventListener("click", async () => {
+      await loadHistory();
       document.getElementById("messagesSection").classList.add("hidden");
       document.getElementById("historySection").classList.remove("hidden");
     });
