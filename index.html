@@ -14,17 +14,31 @@
     <p class="text-sm italic opacity-80">Leave a whisper. Hide a memory. 🕶️</p>
   </header>
 
-  <!-- Message Board -->
-  <section class="max-w-2xl mx-auto mt-10 p-6 bg-gray-800 rounded-lg shadow-lg">
-    <h2 class="text-xl mb-4 font-semibold">📬 Messages</h2>
+  <!-- Real-Time Messaging Section -->
+  <section id="messagesSection" class="max-w-2xl mx-auto mt-10 p-6 bg-gray-800 rounded-lg shadow-lg">
+    <h2 class="text-xl mb-4 font-semibold">📬 Send a Message</h2>
     
     <div class="space-y-4">
       <textarea id="messageInput" placeholder="Leave your secret message..." class="w-full px-3 py-2 text-black rounded h-24"></textarea>
-      <button id="sendButton" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Send ✉️</button>
+      <div class="flex gap-4">
+        <button id="sendButton" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">Send ✉️</button>
+        <button id="historyButton" class="bg-yellow-500 hover:bg-yellow-700 text-black px-4 py-2 rounded">View History 🕰️</button>
+      </div>
     </div>
 
     <div id="messages" class="mt-6 space-y-3">
-      <!-- Messages will appear here -->
+      <!-- Live messages appear here if added later -->
+    </div>
+  </section>
+
+  <!-- History Section (hidden by default) -->
+  <section id="historySection" class="max-w-2xl mx-auto mt-10 p-6 bg-gray-800 rounded-lg shadow-lg hidden">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">🕰️ Full Message History</h2>
+      <button id="backButton" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded">Back</button>
+    </div>
+    <div id="messageHistory" class="space-y-3">
+      <!-- History gets populated by app.js -->
     </div>
   </section>
 
@@ -33,7 +47,7 @@
     &copy; 2025 <span class="italic">The Sneaky Two™</span> 👀
   </footer>
 
-  <!-- Firebase App & Firestore (needed for Firebase 10+) -->
+  <!-- Load Script -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
